@@ -13,6 +13,16 @@ public class Square {
 		square = new Cell[MAX_SQUARE_HEIGHT][MAX_SQUARE_WIDTH];
 	}
 	
+	public Square(int[][] cells){
+		square = new Cell[MAX_SQUARE_HEIGHT][MAX_SQUARE_WIDTH];
+
+		for (int i = 0; i < cells.length; i++) {
+			for (int j = 0; j < cells[i].length; j++) {
+				this.square[i][j] = new Cell(cells[i][j]);
+			}
+		}
+	}
+	
 	public Cell getCell(int x, int y){
 		return this.square[x][y];
 	}
