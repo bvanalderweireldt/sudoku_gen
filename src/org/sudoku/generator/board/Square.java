@@ -1,5 +1,8 @@
 package org.sudoku.generator.board;
 
+import java.util.Collections;
+import java.util.Stack;
+
 public class Square {
 	final static int MAX_SQUARE_WIDTH = 3;
 	final static int MAX_SQUARE_HEIGHT = 3;
@@ -83,5 +86,27 @@ public class Square {
 	
 	public Cell[][] getSquare(){
 		return this.square;
+	}
+	
+	/**
+	 * 
+	 * @return a valid (numbers are unique) full square
+	 */
+	public static Square generateValidSquare(){
+		Square validSquare = new Square();
+		Stack<Integer> validNumbersStack = new Stack<Integer>();
+		for (int i = Cell.MIN_CELL_VALUE; i <= Cell.MAX_CELL_VALUE; i++) {
+			validNumbersStack.push(i);
+		}
+		
+		Collections.shuffle(validNumbersStack);
+		
+		for (int i = 0; i < MAX_SQUARE_HEIGHT; i++) {
+			for (int j = 0; j < MAX_SQUARE_WIDTH; j++) {
+				validSquare.addCell(i, j, new Cell(validNumbersStack.pop().intValue()));
+			}
+		}
+		
+		return validSquare;
 	}
 }
