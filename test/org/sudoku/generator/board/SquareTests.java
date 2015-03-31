@@ -1,6 +1,7 @@
 package org.sudoku.generator.board;
 
 import static org.junit.Assert.*;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -51,12 +52,23 @@ public class SquareTests {
 		
 		assertFalse(square.squareValid());
 		assertFalse(inValidSquare.squareValid());
+		assertFalse(new Square( new int[][] { { 9 , 4 , 3 }, { 2, 7, 6 }, { 8, 1, 4 } } ).squareValid());
 	}
 	
 	@Test
 	public void squareValid(){
 		assertTrue(validSquare.squareValid());
 		assertTrue(validSquare2.squareValid());
+		assertTrue(new Square( new int[][] { { 9 , 5 , 3 }, { 2, 7, 6 }, { 8, 1, 4 } } ).squareValid());
+		assertTrue(new Square( new int[][] { { 9 , 5 , 3 }, { 2, 7, 6 }, { 8, 1, 4 } } ).squareValid());
+		assertTrue(new Square( new int[][] { { 2 , 1 , 4 }, { 8, 5, 3 }, { 6, 7, 9 } } ).squareValid());
+		assertTrue(new Square( new int[][] { { 7 , 6 , 8 }, { 4, 1, 9 }, { 2, 3, 5 } } ).squareValid());
+		assertTrue(new Square( new int[][] { { 7 , 4 , 8 }, { 6, 9, 1 }, { 5, 3, 2 } } ).squareValid());
+		assertTrue(new Square( new int[][] { { 5 , 3 , 1 }, { 7, 4, 2 }, { 9, 6, 8 } } ).squareValid());
+		assertTrue(new Square( new int[][] { { 6 , 9 , 2 }, { 5, 8, 3 }, { 1, 7, 4 } } ).squareValid());
+		assertTrue(new Square( new int[][] { { 1 , 6 , 9 }, { 3, 2, 5 }, { 4, 8, 7 } } ).squareValid());
+		assertTrue(new Square( new int[][] { { 3 , 8 , 5 }, { 2, 7, 6 }, { 9, 1, 4 } } ).squareValid());
+
 	}
 	
 	@Test
@@ -70,5 +82,8 @@ public class SquareTests {
 	public void squareFull(){
 		assertTrue(validSquare.squareFull());
 		assertTrue(validSquare2.squareFull());
+		
+		assertTrue(new Square( new int[][] { { 9 , 5 , 3 }, { 2, 7, 6 }, { 8, 1, 4 } } ).squareFull());
 	}
+
 }

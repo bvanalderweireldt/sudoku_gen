@@ -20,6 +20,17 @@ public class Board {
 		}
 	}
 	
+	public Board(int[][][][] board){
+		this.board = new Square[MAX_BOARD_HEIGHT][MAX_BOARD_WIDTH];
+		for (int i = 0; i < board.length; i++) {
+			for (int j = 0; j < board[i].length; j++) {
+				addSquare(i, j, new Square(board[i][j]));
+			}
+		}
+	}
+	
+	
+	
 	public void addSquare(int x, int y, Square s){
 		this.board[x][y] = s;
 	}
@@ -40,10 +51,6 @@ public class Board {
 		return false;
 	}
 	
-	/*
-	 * [0][0][0][0]
-	 * [0][0][0][0]
-	 */
 	public boolean lineValid(int line){
 		int square = 0;
 		switch (line) {
@@ -56,6 +63,7 @@ public class Board {
 		case 4:
 		case 5:
 			square = 1;
+			break;
 		case 6:
 		case 7:
 		case 8:
@@ -89,6 +97,7 @@ public class Board {
 		case 4:
 		case 5:
 			square = 1;
+			break;
 		case 6:
 		case 7:
 		case 8:
@@ -135,7 +144,7 @@ public class Board {
 	}
 	
 	public boolean allLinesValid(){
-		for (int i = 0; i < MAX_BOARD_WIDTH * Square.MAX_SQUARE_WIDTH ; i++) {
+		for (int i = 0; i < MAX_BOARD_HEIGHT * Square.MAX_SQUARE_HEIGHT ; i++) {
 			if( ! lineValid(i) ){
 				return false;
 			}
@@ -144,7 +153,7 @@ public class Board {
 	}
 
 	public boolean allColumnsValid(){
-		for (int i = 0; i < MAX_BOARD_HEIGHT * Square.MAX_SQUARE_HEIGHT ; i++) {
+		for (int i = 0; i < MAX_BOARD_WIDTH * Square.MAX_SQUARE_WIDTH ; i++) {
 			if( ! columnValid(i) ){
 				return false;
 			}
