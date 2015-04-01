@@ -1,5 +1,7 @@
 package org.sudoku.generator.board;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Random;
 import java.util.Stack;
@@ -8,7 +10,9 @@ import java.util.Stack;
 public class Board {
 	final static int MAX_BOARD_WIDTH = 3;
 	final static int MAX_BOARD_HEIGHT = 3;
-
+	
+	final static int MAX_POSITION_BOARD = (int)(Math.sqrt(MAX_BOARD_WIDTH) * Math.sqrt(MAX_BOARD_HEIGHT));
+	final static int POSITION_AXES = 4;
 	public enum SubsetType {
 		LINE,
 		COLUMN
@@ -168,20 +172,42 @@ public class Board {
 		return sb.toString();
 	}
 	
-	public Stack<int[]> getFreeCells(){
-		Stack<int[]> freeCells = new Stack<int[]>();
+	public Stack<int[]> getFreeCellsStack(){
+		Stack<int[]> freeCells = new Stack<>();
 		for (int i = 0; i < MAX_BOARD_HEIGHT; i++) {
 			for (int j = 0; j < Square.MAX_SQUARE_HEIGHT; j++) {
 				for (int k = 0; k < MAX_BOARD_WIDTH; k++) {
 					for (int l = 0; l < Square.MAX_SQUARE_WIDTH; l++) {
 						if( board[i][j].getSquare()[k][l] == null ){
-							freeCells.add( new int[]{i,j,k,l} );
+							freeCells.add(new int[]{i,j,k,l});
 						}
 					}
 				}
 			}
 		}
-		return freeCells;
+		return freeCells;		
+	}
+	
+	public ArrayList<int[]> getFreeCellsList(){
+		return new ArrayList<int[]>(Arrays.asList(getFreeCellsArray())); 
+	}
+	
+	public int[][] getFreeCellsArray(){
+		int[][] freeCells = new int[MAX_POSITION_BOARD][POSITION_AXES];
+		int freeCellsIndex = 0;
+		for (int i = 0; i < MAX_BOARD_HEIGHT; i++) {
+			for (int j = 0; j < Square.MAX_SQUARE_HEIGHT; j++) {
+				for (int k = 0; k < MAX_BOARD_WIDTH; k++) {
+					for (int l = 0; l < Square.MAX_SQUARE_WIDTH; l++) {
+						if( board[i][j].getSquare()[k][l] == null ){
+							freeCells[freeCellsIndex] = new int[]{i,j,k,l};
+							i++;
+						}
+					}
+				}
+			}
+		}
+		return freeCells;		
 	}
 	
 	public void generateBoard(){
@@ -191,30 +217,6 @@ public class Board {
 				clearBoard();
 			}
 		}while ( ! boardFull() );
-/*		int X,Y,x,y;
-		int print = 5000;
-		int tuck = 0;
-		while( ! boardFull() ){
-			if(print-- == 0){
-				System.out.println(this.toString());
-				print = 1000;
-			}
-			X = randPosition();
-			Y = randPosition();
-			x = randPosition();
-			y = randPosition();
-			
-			if( board[X][Y].getSquare()[x][y] != null ){
-				continue;
-			}
-			
-			board[X][Y].getSquare()[x][y] = new Cell(randInt());
-			if(boardValid()){
-				continue;
-			}
-			board[X][Y].getSquare()[x][y] = null;
-		}
-*/
 	}
 	
 	private void clearBoard() {
@@ -222,7 +224,7 @@ public class Board {
 			for (int j = 0; j < Square.MAX_SQUARE_HEIGHT; j++) {
 				for (int k = 0; k < MAX_BOARD_WIDTH; k++) {
 					for (int l = 0; l < Square.MAX_SQUARE_WIDTH; l++) {
-						board[i][k].getSquare()[j][l] = null;
+						board[i][j].getSquare()[k][l] = null;
 					}
 				}
 			}
@@ -243,7 +245,8 @@ public class Board {
 		
 		do {
 			freeCells : {
-				freeCells = getFreeCells();
+				tries = 0;
+				freeCells = getFreeCellsStack();
 			
 				Collections.shuffle(freeCells);
 				
@@ -254,17 +257,20 @@ public class Board {
 				pos = freeCells.pop();
 				while ( ! shuffledCellValues.empty() ) {
 					int i = shuffledCellValues.pop().intValue();
+					System.out.println(""+pos[0]+""+pos[1]+pos[2]+pos[3]);
 					board[pos[0]][pos[1]].getSquare()[pos[2]][pos[3]] = new Cell(i);
 					if(boardValid()){
 						break freeCells;
 					}
-
+					
 					board[pos[0]][pos[1]].getSquare()[pos[2]][pos[3]] = null;
-
-					if(++tries > MAX_TRIES){
+					tries++;
+					if(tries > MAX_TRIES){
+						System.out.println(toString());
+						int[] delCell = freeCells.pop();
+						board[delCell[0]][delCell[1]].getSquare()[delCell[2]][delCell[3]] = null;
 						break freeCells;
 					}
-					System.out.println(toString());
 				}
 			}
 		} while ( ! freeCells.empty() ) ;
