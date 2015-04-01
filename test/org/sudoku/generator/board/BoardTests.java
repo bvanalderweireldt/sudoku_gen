@@ -39,22 +39,41 @@ public class BoardTests {
 	}
 	
 	@Test
-	public void columnValid(){
+	public void allColumnsValid(){
 		assertTrue( validBoard.allColumnsValid() );
 		assertTrue( validBoard2.allColumnsValid() );
 		
-		System.out.println(invalidBoard);
 		assertFalse(invalidBoard.allColumnsValid());
 		assertFalse(invalidBoard2.allColumnsValid());
 	}
 	
 	@Test 
-	public void lineValid(){
+	public void allLinesValid(){
 		assertTrue( validBoard.allLinesValid() );
 		assertTrue( validBoard2.allLinesValid() );		
 
 		assertFalse(invalidBoard.allLinesValid());
 		assertFalse(invalidBoard2.allLinesValid());
+	}
+	
+	@Test
+	public void columnValid(){
+		assertTrue(validBoard.columnValid(0, 0));
+		assertTrue(validBoard.columnValid(2, 1));
+		assertTrue(validBoard.columnValid(1, 2));
+
+		assertTrue(validBoard2.columnValid(0, 1));
+		assertTrue(validBoard2.columnValid(1, 1));
+		assertTrue(validBoard2.columnValid(2, 2));
+
+		assertFalse(invalidBoard.columnValid(1, 2));
+		assertFalse(invalidBoard2.columnValid(0, 0));
+	}
+	
+	@Test
+	public void getCell(){
+		assertTrue(validBoard.getCell(1, 0, 0, 2).getValue() == 8);
+		assertTrue(validBoard2.getCell(2, 1, 2, 1).getValue() == 1);
 	}
 	
 }

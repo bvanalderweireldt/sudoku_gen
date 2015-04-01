@@ -9,6 +9,10 @@ public class Board {
 	final static int MAX_BOARD_WIDTH = 3;
 	final static int MAX_BOARD_HEIGHT = 3;
 
+	public enum SubsetType {
+		LINE,
+		COLUMN
+	}
 	private Square[][] board;
 	
 	public Board() {
@@ -51,74 +55,44 @@ public class Board {
 		return false;
 	}
 	
-	public boolean lineValid(int line){
-		int square = 0;
-		switch (line) {
-		case 0:
-		case 1:
-		case 2:
-			square = 0;
-			break;
-		case 3:
-		case 4:
-		case 5:
-			square = 1;
-			break;
-		case 6:
-		case 7:
-		case 8:
-			square = 2;
-			break;
-		}
-		boolean[] existInLine = new boolean[ ( MAX_BOARD_HEIGHT * Square.MAX_SQUARE_HEIGHT + 1 ) ];
+	public boolean subsetValid(int squarePos, int cellPos, SubsetType type ){
+		boolean[] valids = new boolean[ ( MAX_BOARD_HEIGHT*Square.MAX_SQUARE_HEIGHT ) + 1 ];
+		Cell c = null;
 		for (int i = 0; i < MAX_BOARD_HEIGHT; i++) {
-			for (int j = 0; j < Square.MAX_SQUARE_HEIGHT; j++) {
-				if(this.board[square][i].getSquare()[square][j] == null){
-					continue;
+			for (int j = 0; j < Square.MAX_SQUARE_HEIGHT ; j++) {
+				
+				switch (type) {
+				case COLUMN:					
+					c = getCell(i, squarePos, j, cellPos);
+					break;
+				case LINE:
+					c = getCell(squarePos ,i ,cellPos ,j);
+					break;
 				}
-				else if(existInLine[ this.board[square][i].getSquare()[square][j].getValue() ] == true){
-					return false;
-				}
-				existInLine[ this.board[square][i].getSquare()[square][j].getValue() ] = true;
+				
+				
+				if(c == null) continue;
+				
+				if(valids[c.getValue()] == true) return false;
+				
+				valids[c.getValue()] = true;
 			}
 		}
-		return true;
+		return true;		
+	}
+	
+	public boolean lineValid(int squareHeightPos, int cellHeightPos){
+		return subsetValid(squareHeightPos, cellHeightPos, SubsetType.LINE);
 	}
 
-	public boolean columnValid(int column){
-		int square = 0;
-		switch (column) {
-		case 0:
-		case 1:
-		case 2:
-			square = 0;
-			break;
-		case 3:
-		case 4:
-		case 5:
-			square = 1;
-			break;
-		case 6:
-		case 7:
-		case 8:
-			square = 2;
-			break;
-		}
-		
-		boolean[] existInColumn = new boolean[ ( MAX_BOARD_WIDTH * Square.MAX_SQUARE_WIDTH + 1 )];
-		for (int i = 0; i < MAX_BOARD_WIDTH; i++) {
-			for (int j = 0; j < Square.MAX_SQUARE_WIDTH; j++) {
-				if(this.board[i][square].getSquare()[j][square] == null){
-					continue;
-				}
-				else if(existInColumn[ this.board[i][square].getSquare()[j][square].getValue() ] == true){
-					return false;
-				}
-				existInColumn[ this.board[i][square].getSquare()[j][square].getValue() ] = true;
-			}
-		}
-		return true;
+	/**
+	 * 
+	 * @param column, column number from 0
+	 */
+	public boolean columnValid(int squareWidthPos, int cellWidthPos){
+		return subsetValid(squareWidthPos, cellWidthPos, SubsetType.COLUMN);
 	}
+	
 	
 	
 	public boolean boardFull(){
@@ -143,22 +117,28 @@ public class Board {
 		return true;
 	}
 	
-	public boolean allLinesValid(){
-		for (int i = 0; i < MAX_BOARD_HEIGHT * Square.MAX_SQUARE_HEIGHT ; i++) {
-			if( ! lineValid(i) ){
-				return false;
+	
+	private boolean allValid(SubsetType subset){
+		for (int i = 0; i < MAX_BOARD_WIDTH ; i++) {
+			for (int j = 0; j < Square.MAX_SQUARE_WIDTH ; j++) {
+				switch (subset) {
+				case COLUMN:
+					if( ! columnValid(i,j) ) return false;
+					break;
+				case LINE:
+					if( ! lineValid(i,j) ) return false;
+					break;
+				}
 			}
 		}
 		return true;
 	}
+	public boolean allLinesValid(){
+		return allValid(SubsetType.LINE);
+	}
 
 	public boolean allColumnsValid(){
-		for (int i = 0; i < MAX_BOARD_WIDTH * Square.MAX_SQUARE_WIDTH ; i++) {
-			if( ! columnValid(i) ){
-				return false;
-			}
-		}
-		return true;
+		return allValid(SubsetType.COLUMN);
 	}
 	
 	public boolean boardValid(){
@@ -315,6 +295,14 @@ public class Board {
 
 	    return randomNum;
 		
+	}
+	
+	public Cell getCell(int X, int Y, int x, int y){
+		return this.board[X][Y].getSquare()[x][y];
+	}
+	
+	public boolean isCellNull(int X, int Y, int x, int y){
+		return this.getCell(X, Y, x, y) == null;
 	}
 	
 }
