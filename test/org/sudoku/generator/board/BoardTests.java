@@ -76,4 +76,19 @@ public class BoardTests {
 		assertTrue(validBoard2.getCell(2, 1, 2, 1).getValue() == 1);
 	}
 	
+	@Test
+	public void boardFull(){
+		assertTrue(validBoard.boardFull());
+		assertTrue(validBoard2.boardFull());
+	}
+	
+	@Test
+	public void boardValid(){
+		assertTrue(validBoard.boardValid());
+		assertTrue(validBoard2.boardValid());
+
+		assertFalse(invalidBoard.boardValid());
+		assertFalse(invalidBoard2.boardValid());
+	}
+	
 }

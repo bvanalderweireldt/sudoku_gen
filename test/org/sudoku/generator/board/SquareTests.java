@@ -84,6 +84,10 @@ public class SquareTests {
 		assertTrue(validSquare2.squareFull());
 		
 		assertTrue(new Square( new int[][] { { 9 , 5 , 3 }, { 2, 7, 6 }, { 8, 1, 4 } } ).squareFull());
+		assertFalse(new Square( new int[][] { { 3 , 8 , 5 }, { 2, 7, 6 }, { 9, 4 } } ).squareFull());
+		assertFalse(new Square( new int[][] { { 2, 7, 6 }, { 9, 4, 2 } } ).squareFull());
+		assertFalse(new Square( new int[][] { { 1, 1, 1 }, { 1, 1, 1 }, { 1, 0, 1 } } ).squareFull());
+
 	}
 
 }
