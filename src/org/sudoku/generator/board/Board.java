@@ -2,7 +2,6 @@ package org.sudoku.generator.board;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Random;
 import java.util.Stack;
 
@@ -13,6 +12,28 @@ public class Board {
 	
 	final static int MAX_POSITION_BOARD = (int)(Math.sqrt(MAX_BOARD_WIDTH) * Math.sqrt(MAX_BOARD_HEIGHT));
 	final static int POSITION_AXES = 4;
+	
+	/**
+	 * How many times we try to resolve the board before we randomly delete RELEASE_NUMBERS
+	 */
+	final static int RESOLVE_MAX_TRIES = 100;
+	
+	/**
+	 * How many numbers we randomly delete when we are stuck
+	 */
+	final static int RELEASE_NUMBERS = 2;
+
+	
+	Random randomValue = new Random();
+
+	Random randomPosition = new Random();
+
+	Random randomFreeCell = new Random();
+
+	Stack<int[]> freeCellsStack = new Stack<int[]>();
+
+	Stack<int[]> lastInsertCellStack = new Stack<int[]>();
+	
 	public enum SubsetType {
 		LINE,
 		COLUMN
@@ -97,7 +118,9 @@ public class Board {
 		return subsetValid(squareWidthPos, cellWidthPos, SubsetType.COLUMN);
 	}
 	
-	
+	public boolean boardCompleted(){
+		return boardFull() && boardValid();
+	}
 	
 	public boolean boardFull(){
 		for (int i = 0; i < board.length; i++) {
@@ -201,7 +224,6 @@ public class Board {
 					for (int l = 0; l < Square.MAX_SQUARE_WIDTH; l++) {
 						if( board[i][j].getSquare()[k][l] == null ){
 							freeCells[freeCellsIndex] = new int[]{i,j,k,l};
-							i++;
 						}
 					}
 				}
@@ -209,98 +231,93 @@ public class Board {
 		}
 		return freeCells;		
 	}
-	
-	public void generateBoard(){
-		do{
-			if(  ! resolveBoard() ) {
-				System.out.println(this);
-				clearBoard();
-			}
-		}while ( ! boardFull() );
-	}
-	
-	private void clearBoard() {
-		for (int i = 0; i < MAX_BOARD_HEIGHT; i++) {
-			for (int j = 0; j < Square.MAX_SQUARE_HEIGHT; j++) {
-				for (int k = 0; k < MAX_BOARD_WIDTH; k++) {
-					for (int l = 0; l < Square.MAX_SQUARE_WIDTH; l++) {
-						board[i][j].getSquare()[k][l] = null;
-					}
-				}
-			}
-		}
-	}
-
-	public boolean resolveBoard(){
 		
-		Stack<int[]> freeCells;
-		int[] pos;
-		final int MAX_TRIES = 10;
+	/**
+	 * Try to generate a valid solution
+	 * We start with an empty board
+	 * 
+	 * while(board is not full and valid)
+	 * 	insert random value into random free position
+	 * 	continue if the board is valid
+	 * 	delete the inserted number if not valid
+	 * 	if we have deleted the last max_tries numbers without any success
+	 * 		we release randomly valid release_numbers  from occupied positions
+	 * 
+	 */
+	public void generateValidBoard(){
 		int tries = 0;
-		Stack<Integer> cellValues = new Stack<Integer>();
-		
-		for (int i = 1; i <= Cell.MAX_CELL_VALUE; i++) {
-			cellValues.add(i);
-		}
-		
-		do {
-			freeCells : {
-				tries = 0;
-				freeCells = getFreeCellsStack();
+		while( ! boardCompleted() ){
+
+			freeCellsStack = getFreeCellsStack();
+
+			insertRandomValueIntoRandomFreePosition();
 			
-				Collections.shuffle(freeCells);
-				
-				@SuppressWarnings("unchecked")
-				Stack<Integer> shuffledCellValues = (Stack<Integer>) cellValues.clone();
-				Collections.shuffle(shuffledCellValues);
-				
-				pos = freeCells.pop();
-				while ( ! shuffledCellValues.empty() ) {
-					int i = shuffledCellValues.pop().intValue();
-					System.out.println(""+pos[0]+""+pos[1]+pos[2]+pos[3]);
-					board[pos[0]][pos[1]].getSquare()[pos[2]][pos[3]] = new Cell(i);
-					if(boardValid()){
-						break freeCells;
-					}
-					
-					board[pos[0]][pos[1]].getSquare()[pos[2]][pos[3]] = null;
-					tries++;
-					if(tries > MAX_TRIES){
-						System.out.println(toString());
-						int[] delCell = freeCells.pop();
-						board[delCell[0]][delCell[1]].getSquare()[delCell[2]][delCell[3]] = null;
-						break freeCells;
-					}
-				}
+			if(boardValid()) continue;
+			
+			deleteCell(lastInsertCellStack.pop());
+			
+			if(++tries > RESOLVE_MAX_TRIES){
+				releaseRandomCells(getFreeCellsStack());
+				tries = 0;
 			}
-		} while ( ! freeCells.empty() ) ;
-		return true;
+		}
 	}
 	
-	public static int randInt() {
+	private void releaseRandomCells(Stack<int[]> stack) {
+		for (int i = 0; i <= RELEASE_NUMBERS; i++) {
+			int random  = randomFreeCell.nextInt(lastInsertCellStack.size());
+			deleteCell(lastInsertCellStack.get(random));
+			lastInsertCellStack.remove(random);
+		}
+	}
 
-	    // NOTE: Usually this should be a field rather than a method
-	    // variable so that it is not re-seeded every call.
-	    Random rand = new Random();
-
-	    // nextInt is normally exclusive of the top value,
-	    // so add 1 to make it inclusive
-	    int randomNum = rand.nextInt((Cell.MAX_CELL_VALUE - Cell.MIN_CELL_VALUE) + 1) + Cell.MIN_CELL_VALUE;
-
-	    return randomNum;
+	/**
+	 * 
+	 * @return a random integer between MIN_CELL_VALUE and MAX_CELL_VALUE
+	 */
+	public int getRandomValue(){
+		return ( randomValue.nextInt(Cell.MAX_CELL_VALUE) + 1);
 	}
 	
-	public static int randPosition(){
-	    // NOTE: Usually this should be a field rather than a method
-	    // variable so that it is not re-seeded every call.
-	    Random rand = new Random();
-
-	    // nextInt is normally exclusive of the top value,
-	    // so add 1 to make it inclusive
-	    int randomNum = rand.nextInt((2 - 0) + 1) + 0;
-
-	    return randomNum;
+	public void insertRandomValueIntoRandomPosition(){
+		int[] randomPosition = getRandomPosition();
+		int randomValue = getRandomValue();
 		
+		insertValue(randomPosition[0],
+					randomPosition[1],
+					randomPosition[2],
+					randomPosition[3],
+					randomValue);
+		lastInsertCellStack.push(randomPosition);
+	}
+
+	public void insertRandomValueIntoRandomFreePosition(){
+		int[] randomPosition = freeCellsStack.get(randomFreeCell.nextInt(freeCellsStack.size()));
+		int randomValue = getRandomValue();
+		
+		insertValue(randomPosition[0],
+					randomPosition[1],
+					randomPosition[2],
+					randomPosition[3],
+					randomValue);
+		
+		lastInsertCellStack.push(randomPosition);		
+	}
+	
+	public void insertValue(int X, int Y, int x, int y, int value){
+		this.board[X][Y].addCell(x, y, new Cell(value));
+	}
+	/**
+	 * 
+	 * @return an array of 4 integer materializing a position on the board
+	 */
+	public int[] getRandomPosition(){
+		return new int[]{
+				randomPosition.nextInt(Board.POSITION_AXES), 
+				randomPosition.nextInt(Board.POSITION_AXES),
+				randomPosition.nextInt(Board.POSITION_AXES),
+				randomPosition.nextInt(Board.POSITION_AXES)
+				};
 	}
 	
 	public Cell getCell(int X, int Y, int x, int y){
@@ -309,6 +326,14 @@ public class Board {
 	
 	public boolean isCellNull(int X, int Y, int x, int y){
 		return this.getCell(X, Y, x, y) == null;
+	}
+	
+	private void deleteCell(int X, int Y, int x, int y){
+		this.board[X][Y].getSquare()[x][y] = null;
+	}
+
+	private void deleteCell(int[] pos){
+		deleteCell(pos[0],pos[1],pos[2],pos[3]);
 	}
 	
 }

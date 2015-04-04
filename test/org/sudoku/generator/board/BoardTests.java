@@ -13,6 +13,8 @@ public class BoardTests {
 	Board validBoard, validBoard2;
 	Board invalidBoard, invalidBoard2;
 	Board freeCellsBoard,freeCellsBoard2;
+	Board emptyBoard;
+	Board generated;
 	
 	final static int[][][][] validBoardArray = new int[][][][] { 
 		{{{9,5,3}, {2,7,6}, {8,1,4} }, { {2,1,4}, {8,5,3}, {6,7,9} }, { {7,6,8}, {4,1,9}, {2,3,5} }},
@@ -55,12 +57,18 @@ public class BoardTests {
 		
 		freeCellsBoard = new Board(freeCellsArray);
 		freeCellsBoard2 = new Board(freeCellsArray2);
+		
+		emptyBoard = new Board();
+		
+		generated = new Board();
+		generated.generateValidBoard();
 	}
 	
 	@Test
 	public void allColumnsValid(){
-		assertTrue( validBoard.allColumnsValid() );
-		assertTrue( validBoard2.allColumnsValid() );
+		assertTrue(validBoard.allColumnsValid());
+		assertTrue(validBoard2.allColumnsValid());
+		assertTrue(generated.allColumnsValid());
 		
 		assertFalse(invalidBoard.allColumnsValid());
 		assertFalse(invalidBoard2.allColumnsValid());
@@ -68,8 +76,9 @@ public class BoardTests {
 	
 	@Test 
 	public void allLinesValid(){
-		assertTrue( validBoard.allLinesValid() );
-		assertTrue( validBoard2.allLinesValid() );		
+		assertTrue(validBoard.allLinesValid());
+		assertTrue(validBoard2.allLinesValid());		
+		assertTrue(generated.allLinesValid());		
 
 		assertFalse(invalidBoard.allLinesValid());
 		assertFalse(invalidBoard2.allLinesValid());
@@ -99,6 +108,8 @@ public class BoardTests {
 	public void boardFull(){
 		assertTrue(validBoard.boardFull());
 		assertTrue(validBoard2.boardFull());
+		
+		assertFalse(emptyBoard.boardFull());
 	}
 	
 	@Test
@@ -108,6 +119,19 @@ public class BoardTests {
 
 		assertFalse(invalidBoard.boardValid());
 		assertFalse(invalidBoard2.boardValid());
+		
+		assertTrue(generated.boardValid());
+	}
+	
+	@Test
+	public void boardCompleted(){
+		assertTrue(validBoard.boardCompleted());
+		assertTrue(validBoard2.boardCompleted());
+		assertTrue(generated.boardCompleted());
+		
+		assertFalse(invalidBoard.boardCompleted());
+		assertFalse(invalidBoard2.boardCompleted());
+		assertFalse(emptyBoard.boardCompleted());
 	}
 	
 	@Test
@@ -124,6 +148,36 @@ public class BoardTests {
 		assertTrue( Arrays.equals(freeCells2.pop(), new int[]{0,1,0,1}) );
 		assertTrue( Arrays.equals(freeCells2.pop(), new int[]{0,0,0,1}) );
 		assertTrue(freeCells2.empty());	
+	}
+	
+	@Test
+	public void getRandomValue(){
+		int i = validBoard.getRandomValue();
+		int j = validBoard.getRandomValue();
+		int k = validBoard.getRandomValue();
+		int l = validBoard.getRandomValue();
+		int m = validBoard.getRandomValue();
+		
+		assertFalse( i == j && i == k && i == l && i == m);
+		
+		assertTrue(i >= Cell.MIN_CELL_VALUE && i <= Cell.MAX_CELL_VALUE);
+		assertTrue(j >= Cell.MIN_CELL_VALUE && j <= Cell.MAX_CELL_VALUE);
+		assertTrue(k >= Cell.MIN_CELL_VALUE && k <= Cell.MAX_CELL_VALUE);
+		assertTrue(l >= Cell.MIN_CELL_VALUE && l <= Cell.MAX_CELL_VALUE);
+		assertTrue(m >= Cell.MIN_CELL_VALUE && m <= Cell.MAX_CELL_VALUE);
+	}
+	@Test
+	public void getRandomPosition(){
+		int[] p = validBoard.getRandomPosition();
+		assertTrue(p.length == 4);
+		assertTrue(p[0] >= 0 && p[0] <=3);
+		assertTrue(p[1] >= 0 && p[1] <=3);
+		assertTrue(p[2] >= 0 && p[2] <=3);
+		assertTrue(p[3] >= 0 && p[3] <=3);
+		int[] p1 = validBoard.getRandomPosition();
+		int[] p2 = validBoard.getRandomPosition();
+
+		assertFalse(Arrays.equals(p, p1) && Arrays.equals(p, p2));
 	}
 	
 }
